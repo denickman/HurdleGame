@@ -57,6 +57,34 @@ class _WordHurdlePageState extends State<WordHurdlePage> {
                   },
                 ),
               ),
+
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Consumer<HurdleProvider>(
+                  builder: (context, provider, child) => Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                            provider.deleteLetter();
+                        },
+                        child: const Text('DELETE'),
+                      ),
+
+                      ElevatedButton(
+                        onPressed: () {
+                            if (!provider.isAValidWord) {
+                              ScaffoldMessenger.of(context)
+                              .showSnackBar(SnackBar(content: Text('Not a word in my dictionary')));
+                              return;
+                            }
+                        },
+                        child: const Text('SUBMIT'),
+                      ),
+                    ]
+                  ),
+                ),
+              )
             ],
           ),
         ),

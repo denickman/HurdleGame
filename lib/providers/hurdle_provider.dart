@@ -13,11 +13,27 @@ class HurdleProvider extends ChangeNotifier {
   String targetWord = '';
   int count = 0;
   final lettersPerRow = 5;
+  int index = 0;
 
   init() {
     totalWords = words.all.where((element) => element.length == 5).toList();
     generateBoard();
     generateRandomWord();
+  }
+
+  void deleteLetter() {
+    if (rowInputs.isNotEmpty) {
+      rowInputs.removeAt(rowInputs.length - 1);
+      print(rowInputs);
+    }
+
+    if (count > 0) {
+      hurdleBoard[index - 1] = Wordle(letter: '');
+      count--;
+      index--;
+    }
+
+    notifyListeners();
   }
 
   generateBoard() {
@@ -30,13 +46,18 @@ class HurdleProvider extends ChangeNotifier {
     debugPrint(targetWord);
   }
 
+  bool get isAValidWord => totalWords.contains(rowInputs.join('').toLowerCase());
+
   inputLetter(String letter) {
     if (count < lettersPerRow) {
-      count++;
+      
       rowInputs.add(letter);
+    hurdleBoard[index] = Wordle(letter: letter); 
+    count++;
+    index++;
     }
 
     debugPrint('Row inputs');
-    debugPrint(rowInputs);
+    notifyListeners();
   }
 }
