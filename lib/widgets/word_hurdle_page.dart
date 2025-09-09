@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hurdleapp/helpers/helper_functions.dart';
 import 'package:hurdleapp/providers/hurdle_provider.dart';
 import 'package:hurdleapp/widgets/keyboard_view.dart';
 import 'package:hurdleapp/widgets/wordle_view.dart';
@@ -66,25 +67,60 @@ class _WordHurdlePageState extends State<WordHurdlePage> {
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                            provider.deleteLetter();
+                          provider.deleteLetter();
                         },
                         child: const Text('DELETE'),
                       ),
 
                       ElevatedButton(
                         onPressed: () {
-                            if (!provider.isAValidWord) {
-                              ScaffoldMessenger.of(context)
-                              .showSnackBar(SnackBar(content: Text('Not a word in my dictionary')));
-                              return;
-                            }
+                          print('ELEVATE BUTTON TAPPEd');
+                          if (!provider.isAValidWord) {
+                            showMessage(context, 'Not a word in my dictionary');
+                            return;
+                          }
+
+                          print('SHOULD CHECK Answer');
+                          if (provider.shouldCheckForAnswer) {
+                            print('CHECK Answer');
+                            provider.checkAnswer();
+                          }
+
+                          if (provider.wins) {
+                            showResult(
+                              context: context,
+                              title: 'You win',
+                              body: 'The word was ${provider.targetWord}',
+                              onPlayAgain: () {
+                                Navigator.pop(context);
+                                provider.reset();
+                              },
+                              onCancel: () {
+                                Navigator.pop(context);
+                              },
+                            );
+                          } else if (provider.noAttemptsLeft) {
+                            showResult(
+                              context: context,
+                              title: "You lost!",
+                              body: "The word was ${provider.targetWord}",
+                              onPlayAgain: () {
+                                Navigator.pop(context);
+                                provider.reset();
+                              },
+                              onCancel: () {
+                                Navigator.pop(context);
+                              },
+                            );
+                          }
+                          ;
                         },
                         child: const Text('SUBMIT'),
                       ),
-                    ]
+                    ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),

@@ -14,6 +14,19 @@ class HurdleProvider extends ChangeNotifier {
   int count = 0;
   final lettersPerRow = 5;
   int index = 0;
+  bool wins = false;
+
+  final totalAttempts = 6;
+  int attempts = 0;
+
+  bool get shouldCheckForAnswer => rowInputs.length == lettersPerRow;
+  bool get noAttemptsLeft => attempts == totalAttempts;
+
+  //   bool get shouldCheckForAnswer {
+  //      final result = rowInputs.length == lettersPerRow;
+  // debugPrint('shouldCheckForAnswer: $result | rowInputs: $rowInputs');
+  // return result;
+  //   }
 
   init() {
     totalWords = words.all.where((element) => element.length == 5).toList();
@@ -46,18 +59,71 @@ class HurdleProvider extends ChangeNotifier {
     debugPrint(targetWord);
   }
 
-  bool get isAValidWord => totalWords.contains(rowInputs.join('').toLowerCase());
+  bool get isAValidWord =>
+      totalWords.contains(rowInputs.join('').toLowerCase());
 
   inputLetter(String letter) {
     if (count < lettersPerRow) {
-      
       rowInputs.add(letter);
-    hurdleBoard[index] = Wordle(letter: letter); 
-    count++;
-    index++;
+      hurdleBoard[index] = Wordle(letter: letter);
+      count++;
+      index++;
     }
 
     debugPrint('Row inputs');
+    notifyListeners();
+  }
+
+  void checkAnswer() {
+    final input = rowInputs.join('').toUpperCase();
+
+    print('input $input');
+    print('Target Word $targetWord');
+
+    if (targetWord == input) {
+      print('TRUE');
+      wins = true;
+    } else {
+      _markLetterOnBoard();
+      if (attempts < totalAttempts) {
+        _goToNextRow();
+      }
+    }
+  }
+
+  void _goToNextRow() {
+    attempts++;
+    count = 0;
+    rowInputs.clear();
+  }
+
+  void _markLetterOnBoard() {
+    for (int i = 0; i < hurdleBoard.length; i++) {
+      if (hurdleBoard[i].letter.isNotEmpty &&
+          targetWord.contains(hurdleBoard[i].letter)) {
+        hurdleBoard[i].existInTarget = true;
+      } else if (hurdleBoard[i].letter.isNotEmpty &&
+          !targetWord.contains(hurdleBoard[i].letter)) {
+        hurdleBoard[i].doesNotExistInTarget = true;
+        excludedLetters.add(hurdleBoard[i].letter);
+      }
+    }
+
+    notifyListeners();
+  }
+
+
+  reset() {
+    count = 0;
+    index = 0;
+    rowInputs.clear();
+    hurdleBoard.clear();
+    excludedLetters.clear();
+    attempts = 0;
+    wins = false;
+    targetWord = '';
+    generateBoard();
+    generateRandomWord();
     notifyListeners();
   }
 }
